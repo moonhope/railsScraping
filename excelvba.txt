@@ -1,0 +1,244 @@
+
+
+Private Sub Button1_Click()
+
+Dim URL
+Dim objIE As Object
+Dim tmp As Object
+Dim GetDt As String
+
+Dim StartDai As String
+Dim StartDai2 As String
+Dim DaiGoukei As Integer
+Dim DaiGoukei2 As Integer
+Dim STARTROW As Integer
+Dim Col As Integer
+Dim NEXTPAGE
+Dim DATEROW As Integer
+Dim Sysdate
+Dim Bonus As Integer
+
+
+NEXTPAGE = "次の台-&gt;"
+STARTROW = 9
+STARTROW2 = 18
+DATEROW = 8
+
+
+
+GetDt = Worksheets("テスト").Cells(5, 3).Value
+
+
+URL = Worksheets("テスト").Cells(2, 13).Value
+
+StartDai = Worksheets("テスト").Cells(3, 13).Value
+DaiGoukei = Worksheets("テスト").Cells(4, 13).Value
+StartDai2 = Worksheets("テスト").Cells(5, 13).Value
+DaiGoukei2 = Worksheets("テスト").Cells(6, 13).Value
+
+Set objIE = CreateObject("InternetExplorer.Application")
+
+With objIE
+     .Navigate (URL)
+     .Visible = True
+End With
+
+Do While objIE.Busy = True
+   DoEvents
+Loop
+
+For i = 0 To objIE.Document.Links.Length - 1
+
+    If StartDai = objIE.Document.Links(i).innerHTML Then
+        objIE.Document.Links(i).Click
+        Exit For
+    End If
+Next i
+
+Do While objIE.Busy = True
+   DoEvents
+Loop
+
+'システム日付を取得
+Sysdate = Date
+
+If GetDt <> Sysdate Then
+
+    FormatGetDt = Format(GetDt, "yyyy/m/dd")
+    
+    '日付が上旬の場合は、01にはサイトがしてこないのでフォーマットを更に変換
+    If Mid(Right(FormatGetDt, 2), 1, 1) = "0" Then
+    
+     FormatGetDt = Format(FormatGetDt, "yyyy/m/d")
+    
+    End If
+
+    For i = 0 To objIE.Document.Links.Length - 1
+    
+    Debug.Print objIE.Document.Links(i).innerHTML
+    
+        If FormatGetDt = objIE.Document.Links(i).innerHTML Then
+            objIE.Document.Links(i).Click
+            Exit For
+        End If
+    
+    Next i
+
+End If
+
+Do While objIE.Busy = True
+   DoEvents
+Loop
+
+For i = 1 To 256
+    If GetDt = Worksheets("テスト").Cells(DATEROW, i).Value Then
+        Col = i
+        Exit For
+    End If
+    
+Next i
+
+
+'データを取得
+For j = 0 To DaiGoukei - 1
+
+    Bonus = 0
+
+    myhtml = objIE.Document.Body.InnerText
+
+    tempBonus = Mid(myhtml, InStr(myhtml, "大当") + 5, 2)
+
+    If InStr(Bonus, ">") Then
+        Bonus = CInt(Mid(tempBonus, 1, 1))
+        
+    Else
+        Bonus = CInt(tempBonus)
+        
+    End If
+
+    Worksheets("テスト").Cells(STARTROW + j, Col).Value = Bonus
+    
+
+    
+    For k = 0 To objIE.Document.Links.Length - 1
+        
+        If NEXTPAGE = objIE.Document.Links(k).innerHTML Then
+
+            objIE.Document.Links(k).Click
+            Do While objIE.Busy = True
+               DoEvents
+            Loop
+            Exit For
+        End If
+    
+    Next k
+
+Next j
+
+
+'以降2回目の処理
+
+With objIE
+     .Navigate (URL)
+     .Visible = True
+End With
+
+Do While objIE.Busy = True
+   DoEvents
+Loop
+
+For i = 0 To objIE.Document.Links.Length - 1
+
+    If StartDai2 = objIE.Document.Links(i).innerHTML Then
+        objIE.Document.Links(i).Click
+
+        Exit For
+    End If
+Next i
+
+Do While objIE.Busy = True
+   DoEvents
+Loop
+
+'システム日付を取得
+Sysdate = Date
+
+If GetDt <> Sysdate Then
+
+    FormatGetDt = Format(GetDt, "yyyy/m/dd")
+    
+    '日付が上旬の場合は、01にはサイトがしてこないのでフォーマットを更に変換
+    If Mid(Right(FormatGetDt, 2), 1, 1) = "0" Then
+    
+     FormatGetDt = Format(FormatGetDt, "yyyy/m/d")
+    
+    End If
+
+    For i = 0 To objIE.Document.Links.Length - 1
+    
+    Debug.Print objIE.Document.Links(i).innerHTML
+    
+        If FormatGetDt = objIE.Document.Links(i).innerHTML Then
+            objIE.Document.Links(i).Click
+            Exit For
+        End If
+    
+    Next i
+
+End If
+
+Do While objIE.Busy = True
+   DoEvents
+Loop
+
+For i = 1 To 200
+    If GetDt = Worksheets("テスト").Cells(DATEROW, i).Value Then
+        Col = i
+        Exit For
+    End If
+    
+Next i
+
+
+
+'2週目のデータを取得
+For j = 0 To DaiGoukei2 - 1
+
+    Bonus = 0
+
+    myhtml = objIE.Document.Body.InnerText
+
+    tempBonus = Mid(myhtml, InStr(myhtml, "大当") + 5, 2)
+
+    If InStr(Bonus, ">") Then
+        Bonus = CInt(Mid(tempBonus, 1, 1))
+        
+    Else
+                
+        Bonus = CInt(tempBonus)
+        
+    End If
+
+    Worksheets("テスト").Cells(STARTROW2 + j, Col).Value = Bonus
+    
+
+    
+    For k = 0 To objIE.Document.Links.Length - 1
+        
+        If NEXTPAGE = objIE.Document.Links(k).innerHTML Then
+
+            objIE.Document.Links(k).Click
+            Do While objIE.Busy = True
+               DoEvents
+            Loop
+            Exit For
+        End If
+    
+    Next k
+
+Next j
+
+
+
+
+End Sub

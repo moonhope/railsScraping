@@ -9,6 +9,8 @@ class YahoosController < ApplicationController
 
  def index
    man_list = []
+   @data_list = Array.new(3800).map{Array.new(3)}
+   i = 0
 
    for num in 2..10 do
      man_list.push(MANSHON + "n-" + num.to_s + '/')
@@ -18,7 +20,7 @@ class YahoosController < ApplicationController
 
      url_list = []
      p man_list[num]
-     
+
      begin
        @doc = Nokogiri::HTML(open(man_list[num]),nil,"utf-8")
      rescue => e
@@ -41,10 +43,12 @@ class YahoosController < ApplicationController
        begin
          sleep(0.1)
          @sub_page = Nokogiri::HTML(open(sub))
-         p @sub_page.xpath('//div[@id="com_info_lite"]/div/h3').inner_text
-         p @sub_page.xpath('//p[@class="address"]').inner_text
-         p @sub_page.xpath('//p[@class="phone"]').inner_text
-       
+
+          @data_list[i][0] =  @sub_page.xpath('//div[@id="com_info_lite"]/div/h3').inner_text
+          @data_list[i][1] = @sub_page.xpath('//p[@class="address"]').inner_text
+          @data_list[i][2] = @sub_page.xpath('//p[@class="phone"]').inner_text
+
+         i += 1
        rescue => e
          p "res2"
          e = Exception.new

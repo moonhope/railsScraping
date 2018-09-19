@@ -1,19 +1,16 @@
-<%
-  @doc.xpath('//div[@class="box_table_main"]').each do |table| 
-    table.css('a').each do |a|
-#      p "https://www.kenbiya.com/pp3" + a[:href]
-#      p a.get_attribute(:href)
-    end
-  end
-%>
-
-<%=
-  @doc.xpath('//li[@class="price"]').each do |price|
-#    concat simple_format(price.css('span').inner_text)
-  end
-%>
-
-<%  @doc.xpath('//li[@class="price"]').each do |price| %>
-    <%= price.css('span').inner_text %><br>
+<table class="table table-striped">
+  <h1>会社情報</h1>
+  <tr>
+   <th>会社</th>
+   <th>住所</th>
+   <th>電話番号</th>
+  </tr>
+<% @data_list.each do |data| %>
+ <tr>
+  <td><%= data[0] %></td>
+  <td><%= data[1] %></td>
+  <td><%= data[2] %></td>
+ </tr>
 <% end %>
+</table>
 
